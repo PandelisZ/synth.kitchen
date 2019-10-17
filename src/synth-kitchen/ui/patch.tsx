@@ -49,10 +49,27 @@ export class Patch extends React.Component<{}, IPatchState> {
 	constructor(props: any) {
 		super(props);
 
-		this.state = {
+		const initialState: IPatchState = {
 			connections: [],
 			racks: [{ index: 0, moduleKeys: [] }]
-		};
+		}
+
+
+		// Retrieve a saved patch if it exists in the hash
+		const savedPatch = window.location.hash.substring(1)
+		if (savedPatch) {
+			const parsedPatch: IPatchState = JSON.parse(decodeURIComponent(savedPatch))
+
+			console.log(parsedPatch)
+			// Some state validation
+			if (parsedPatch.connections && parsedPatch.racks) {
+				initialState.connections = parsedPatch.connections
+				initialState.racks = parsedPatch.racks
+			}
+		}
+
+		this.state = { ...initialState }
+
 	}
 
 	componentDidMount() {
@@ -66,6 +83,11 @@ export class Patch extends React.Component<{}, IPatchState> {
 				this.moduleRemove(key);
 			});
 		});
+	}
+
+	componentWillUpdate(nextProps: any, nextState: IPatchState) {
+		window.location.hash = encodeURIComponent(JSON.stringify(nextState))
+		console.log(encodeURIComponent(JSON.stringify(nextState)))
 	}
 
 	handleKeyDown = (event: KeyboardEvent) => {
